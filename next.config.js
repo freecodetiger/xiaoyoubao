@@ -1,13 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  images: {
-    domains: ['placehold.co'],
-  },
+  reactStrictMode: true,
+  swcMinify: true,
   modularizeImports: {
     '@mui/icons-material': {
       transform: '@mui/icons-material/{{member}}',
     },
   },
-}
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: 'placehold.co',
+      },
+    ],
+  },
+};
 
-module.exports = nextConfig 
+module.exports = nextConfig; 

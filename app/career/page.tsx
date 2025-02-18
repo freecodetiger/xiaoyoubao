@@ -19,10 +19,6 @@ import {
   Paper,
   IconButton,
   Tooltip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
 } from '@mui/material';
 import WorkIcon from '@mui/icons-material/Work';
 import SchoolIcon from '@mui/icons-material/School';
@@ -31,7 +27,6 @@ import SearchIcon from '@mui/icons-material/Search';
 import BusinessCenterIcon from '@mui/icons-material/BusinessCenter';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import Navbar from '@/components/Navbar';
 import { motion } from 'framer-motion';
 
@@ -124,32 +119,23 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function CareerPage() {
-  const [tabValue, setTabValue] = useState(0);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const [tabValue, setTabValue] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const [openResumeForm, setOpenResumeForm] = useState(false);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handleOpenResumeForm = () => {
-    setOpenResumeForm(true);
-  };
-
-  const handleCloseResumeForm = () => {
-    setOpenResumeForm(false);
-  };
-
   return (
-    <main>
+    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default }}>
       <Navbar />
       
       {/* 头部区域 */}
-      <Box 
-        sx={{ 
-          bgcolor: 'primary.main', 
+      <Box
+        sx={{
+          bgcolor: 'primary.main',
           color: 'white',
           py: 8,
           backgroundImage: 'linear-gradient(45deg, #1976d2 30%, #1565c0 90%)',
@@ -157,23 +143,26 @@ export default function CareerPage() {
       >
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
-            <Grid item xs={12} md={7}>
-              <Typography variant="h3" component="h1" gutterBottom>
-                企业招聘直通车
+            <Grid item xs={12} md={6}>
+              <Typography 
+                variant="h3" 
+                component="h1" 
+                gutterBottom
+                sx={{ fontWeight: 600 }}
+              >
+                就业支持中心
               </Typography>
               <Typography variant="h6" paragraph>
-                连接校友企业，助力职业发展，提供优质招聘信息和简历投递通道
+                助力职业发展，链接优质资源
               </Typography>
-              <Box sx={{ mt: 4 }}>
+              <Box sx={{ mt: 4, display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 <Button
                   variant="contained"
                   color="secondary"
                   size="large"
-                  startIcon={<BusinessCenterIcon />}
-                  sx={{ mr: 2, mb: { xs: 2, sm: 0 } }}
-                  onClick={handleOpenResumeForm}
+                  startIcon={<WorkIcon />}
                 >
-                  投递简历
+                  查看岗位
                 </Button>
                 <Button
                   variant="outlined"
@@ -181,24 +170,8 @@ export default function CareerPage() {
                   size="large"
                   startIcon={<SchoolIcon />}
                 >
-                  校友企业入驻
+                  寻找导师
                 </Button>
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={5}>
-              <Box
-                component={motion.div}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8 }}
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  height: { xs: 200, md: 300 },
-                }}
-              >
-                <WorkIcon sx={{ fontSize: { xs: 100, md: 180 }, opacity: 0.8 }} />
               </Box>
             </Grid>
           </Grid>
@@ -536,132 +509,6 @@ export default function CareerPage() {
           ))}
         </Grid>
       </Container>
-
-      {/* 标签页区域 */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 8 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-          <Tabs 
-            value={tabValue} 
-            onChange={handleTabChange}
-            variant={isMobile ? "scrollable" : "standard"}
-            scrollButtons={isMobile ? "auto" : undefined}
-            centered={!isMobile}
-          >
-            <Tab 
-              label="校友企业招聘" 
-              icon={<BusinessCenterIcon />} 
-              iconPosition="start"
-            />
-            <Tab 
-              label="热门岗位" 
-              icon={<TrendingUpIcon />} 
-              iconPosition="start"
-            />
-            <Tab 
-              label="职业发展" 
-              icon={<SchoolIcon />} 
-              iconPosition="start"
-            />
-          </Tabs>
-        </Box>
-      </Container>
-
-      {/* 简历投递表单 */}
-      <Dialog
-        open={openResumeForm}
-        onClose={handleCloseResumeForm}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          <Typography variant="h5" component="div" sx={{ fontWeight: 'bold' }}>
-            简历投递
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            填写以下信息，您的简历将被推送给校友企业，获得优先面试机会
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="姓名"
-                fullWidth
-                required
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="联系电话"
-                fullWidth
-                required
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="邮箱"
-                type="email"
-                fullWidth
-                required
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="毕业院校"
-                fullWidth
-                required
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="毕业年份"
-                fullWidth
-                required
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                label="求职意向"
-                fullWidth
-                required
-                margin="normal"
-                variant="outlined"
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Box sx={{ border: '1px dashed grey', p: 3, borderRadius: 1, textAlign: 'center' }}>
-                <Button
-                  variant="outlined"
-                  component="label"
-                  startIcon={<CloudUploadIcon />}
-                >
-                  上传简历
-                  <input type="file" hidden />
-                </Button>
-                <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                  支持PDF、Word格式，文件大小不超过5MB
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseResumeForm}>取消</Button>
-          <Button variant="contained" color="primary">
-            提交
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </main>
+    </Box>
   );
 } 
