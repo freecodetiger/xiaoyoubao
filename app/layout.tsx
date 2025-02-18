@@ -1,7 +1,6 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import { AppRouterCacheProvider } from '@mui/material-nextjs/v13-appRouter'
-import ThemeRegistry from '@/components/ThemeRegistry'
+import Providers from './providers'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -18,11 +17,9 @@ export default function RootLayout({
   return (
     <html lang="zh">
       <body className={inter.className}>
-        <AppRouterCacheProvider options={{ enableCssLayer: true }}>
-          <ThemeRegistry>
-            {children}
-          </ThemeRegistry>
-        </AppRouterCacheProvider>
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   )
