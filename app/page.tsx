@@ -3,8 +3,6 @@
 import { Box, Container, Grid, Card, CardContent, Typography, Button } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import WorkIcon from '@mui/icons-material/Work';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import PeopleIcon from '@mui/icons-material/People';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -51,7 +49,7 @@ export default function Home() {
               <Typography variant="h6" paragraph>
                 连接校友资源，助力职业发展
               </Typography>
-              <Box sx={{ mt: 4, display: 'flex', flexWrap: 'wrap' }}>
+              <Box sx={{ mt: 4 }}>
                 <Button
                   variant="contained"
                   color="secondary"
@@ -59,20 +57,9 @@ export default function Home() {
                   component={Link}
                   href="/enterprise"
                   startIcon={<BusinessIcon />}
-                  sx={{ mr: 2, mb: { xs: 2, sm: 2 } }}
+                  sx={{ mr: 2, mb: { xs: 2, sm: 0 } }}
                 >
                   企业服务
-                </Button>
-                <Button
-                  variant="contained"
-                  color="info"
-                  size="large"
-                  component={Link}
-                  href="/alumni-network"
-                  startIcon={<PeopleIcon />}
-                  sx={{ mr: 2, mb: { xs: 2, sm: 2 } }}
-                >
-                  校友圈
                 </Button>
                 <Button
                   variant="outlined"
@@ -81,24 +68,8 @@ export default function Home() {
                   component={Link}
                   href="/career"
                   startIcon={<WorkIcon />}
-                  sx={{ mr: 2, mb: { xs: 2, sm: 2 } }}
                 >
-                  企业招聘直通车
-                </Button>
-                <Button
-                  variant="contained"
-                  color="success"
-                  size="large"
-                  component={Link}
-                  href="/enterprise-ai"
-                  startIcon={<SmartToyIcon />}
-                  sx={{ 
-                    background: 'linear-gradient(45deg, #2E7D32 30%, #4CAF50 90%)',
-                    boxShadow: '0 3px 5px 2px rgba(46, 125, 50, .3)',
-                    mb: { xs: 2, sm: 2 }
-                  }}
-                >
-                  企业大模型
+                  就业支持
                 </Button>
               </Box>
             </Grid>
@@ -108,8 +79,6 @@ export default function Home() {
                   src="https://placehold.co/600x400/1976d2/white?text=校友服务平台"
                   alt="校友服务平台"
                   fill
-                  priority
-                  sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: 'contain' }}
                 />
               </Box>
@@ -136,7 +105,6 @@ export default function Home() {
                           src={company.logo}
                           alt={company.name}
                           fill
-                          sizes="(max-width: 768px) 100vw, 33vw"
                           style={{ objectFit: 'contain' }}
                         />
                       </Box>

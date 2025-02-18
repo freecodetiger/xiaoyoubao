@@ -12,17 +12,12 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import MenuItem from '@mui/material/MenuItem';
 import SchoolIcon from '@mui/icons-material/School';
-import SmartToyIcon from '@mui/icons-material/SmartToy';
-import PeopleIcon from '@mui/icons-material/People';
-import WorkIcon from '@mui/icons-material/Work';
 import Link from 'next/link';
 
 const pages = [
   { title: '首页', href: '/' },
   { title: '企业服务', href: '/enterprise' },
-  { title: '校友圈', href: '/alumni-network', icon: 'people' },
-  { title: '企业招聘直通车', href: '/career', icon: 'work' },
-  { title: '企业大模型', href: '/enterprise-ai', icon: 'smartToy' },
+  { title: '就业支持', href: '/career' },
   { title: '个人中心', href: '/profile' },
 ];
 
@@ -94,18 +89,7 @@ function Navbar() {
                   component={Link}
                   href={page.href}
                 >
-                  <Typography textAlign="center" sx={{ display: 'flex', alignItems: 'center' }}>
-                    {page.icon === 'smartToy' && (
-                      <SmartToyIcon fontSize="small" sx={{ mr: 0.5, verticalAlign: 'middle' }} />
-                    )}
-                    {page.icon === 'people' && (
-                      <PeopleIcon fontSize="small" sx={{ mr: 0.5, verticalAlign: 'middle' }} />
-                    )}
-                    {page.icon === 'work' && (
-                      <WorkIcon fontSize="small" sx={{ mr: 0.5, verticalAlign: 'middle' }} />
-                    )}
-                    {page.title}
-                  </Typography>
+                  <Typography textAlign="center">{page.title}</Typography>
                 </MenuItem>
               ))}
             </Menu>
@@ -136,23 +120,8 @@ function Navbar() {
                 component={Link}
                 href={page.href}
                 onClick={handleCloseNavMenu}
-                sx={{ 
-                  my: 2, 
-                  color: (page.title === '企业大模型' || page.title === '校友圈') ? 'primary.main' : 'inherit', 
-                  display: 'flex',
-                  alignItems: 'center',
-                  fontWeight: (page.title === '企业大模型' || page.title === '校友圈') ? 'bold' : 'normal',
-                }}
+                sx={{ my: 2, color: 'inherit', display: 'block' }}
               >
-                {page.icon === 'smartToy' && (
-                  <SmartToyIcon fontSize="small" sx={{ mr: 0.5 }} />
-                )}
-                {page.icon === 'people' && (
-                  <PeopleIcon fontSize="small" sx={{ mr: 0.5 }} />
-                )}
-                {page.icon === 'work' && (
-                  <WorkIcon fontSize="small" sx={{ mr: 0.5 }} />
-                )}
                 {page.title}
               </Button>
             ))}
