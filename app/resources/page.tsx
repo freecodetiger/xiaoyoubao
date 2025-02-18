@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Container,
@@ -19,33 +19,22 @@ import {
   Stack,
   Alert,
   Snackbar,
-  useTheme,
-  useMediaQuery,
-  Tooltip,
-  Fade,
-  Paper,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import FilterListIcon from '@mui/icons-material/FilterList';
 import BusinessIcon from '@mui/icons-material/Business';
 import GroupIcon from '@mui/icons-material/Group';
-import VerifiedIcon from '@mui/icons-material/Verified';
-import StarIcon from '@mui/icons-material/Star';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FilterDialog from '@/components/FilterDialog';
 import Navbar from '@/components/Navbar';
 import { LoadingSection, LoadingOverlay } from '@/components/LoadingState';
 import { useUrlState } from '@/hooks/useUrlState';
 import { debounce } from 'lodash';
-import { motion, AnimatePresence } from 'framer-motion';
 import {
   CACHE_KEYS_EXPORT as CACHE_KEYS,
   saveToCache,
   getFromCache,
   smartSort,
   generateStats,
-  formatDate,
 } from '@/utils/resourceUtils';
 
 // 模拟数据
@@ -122,16 +111,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const MotionCard = motion(Card);
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export default function ResourcesPage() {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  
   // 使用URL状态同步的筛选条件
   const [activeFilters, setActiveFilters] = useUrlState({
     industry: [],
@@ -343,167 +323,50 @@ export default function ResourcesPage() {
     }
   };
 
-  const renderCard = useCallback((item: any, index: number) => (
-    <MotionCard
-      key={item.id}
-      variants={cardVariants}
-      initial="hidden"
-      animate="visible"
-      transition={{ duration: 0.3, delay: index * 0.1 }}
-      sx={{
-        mb: 2,
-        position: 'relative',
-        overflow: 'visible',
-        '&:hover': {
-          transform: 'translateY(-4px)',
-          boxShadow: theme.shadows[8],
-          transition: 'all 0.3s ease-in-out',
-        },
-      }}
-    >
+  const renderCard = (item: any) => (
+    <Card key={item.id} sx={{ mb: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
           <Box>
-            <Typography 
-              variant="h6" 
-              gutterBottom 
-              sx={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                gap: 1,
-                color: theme.palette.primary.main,
-              }}
-            >
+            <Typography variant="h6" gutterBottom>
               {item.title}
-              {item.isVerified && (
-                <Tooltip title="已认证企业">
-                  <VerifiedIcon color="primary" sx={{ fontSize: 20 }} />
-                </Tooltip>
-              )}
-              {item.hasSuccessCase && (
-                <Tooltip title="有成功案例">
-                  <StarIcon color="warning" sx={{ fontSize: 20 }} />
-                </Tooltip>
-              )}
             </Typography>
-            <Typography 
-              variant="subtitle1" 
-              color="text.secondary" 
-              gutterBottom
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1,
-              }}
-            >
-              <BusinessIcon sx={{ fontSize: 16 }} />
+            <Typography variant="subtitle1" color="text.secondary" gutterBottom>
               {item.company}
-              <Chip 
-                label={`${item.companySize}人以上`}
-                size="small"
-                variant="outlined"
-                sx={{ ml: 1 }}
-              />
             </Typography>
           </Box>
-          <Avatar 
-            sx={{ 
-              bgcolor: theme.palette.primary.main,
-              transform: 'scale(1.2)',
-              transition: 'transform 0.2s',
-              '&:hover': {
-                transform: 'scale(1.3)',
-              }
-            }}
-          >
+          <Avatar sx={{ bgcolor: 'primary.main' }}>
             {tabValue === 0 ? <BusinessIcon /> : <GroupIcon />}
           </Avatar>
         </Box>
-        
-        <Paper 
-          elevation={0} 
-          sx={{ 
-            p: 2, 
-            mb: 2, 
-            bgcolor: theme.palette.grey[50],
-            borderRadius: 2
-          }}
-        >
-          <Typography variant="body1">
-            {item.description}
-          </Typography>
-        </Paper>
-
-        <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+        <Typography variant="body1" paragraph>
+          {item.description}
+        </Typography>
+        <Box sx={{ mb: 2 }}>
           {item.tags.map((tag: string) => (
             <Chip
               key={tag}
               label={tag}
               size="small"
-              color="primary"
+              sx={{ mr: 1, mb: 1 }}
               variant="outlined"
-              sx={{
-                borderRadius: '4px',
-                '&:hover': {
-                  backgroundColor: theme.palette.primary.light,
-                  color: theme.palette.primary.contrastText,
-                }
-              }}
             />
           ))}
         </Box>
-
-        <Box sx={{ 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: 2
-        }}>
-          <Stack spacing={1}>
-            <Typography 
-              variant="body2" 
-              color="text.secondary"
-              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-            >
-              <LocationOnIcon sx={{ fontSize: 16 }} />
-              {item.location}
-            </Typography>
-            <Typography 
-              variant="body2" 
-              color="text.secondary"
-              sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-            >
-              <AccessTimeIcon sx={{ fontSize: 16 }} />
-              {formatDate(item.createdAt)}
-            </Typography>
-          </Stack>
-          
-          <Button 
-            variant="contained" 
-            size="medium"
-            sx={{
-              borderRadius: '8px',
-              textTransform: 'none',
-              px: 3,
-              py: 1,
-              boxShadow: 2,
-              '&:hover': {
-                transform: 'scale(1.05)',
-                boxShadow: 4,
-              },
-              transition: 'all 0.2s ease-in-out',
-            }}
-          >
-            立即对接
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="body2" color="text.secondary">
+            {item.contact}
+          </Typography>
+          <Button variant="contained" size="small">
+            联系对接
           </Button>
         </Box>
       </CardContent>
-    </MotionCard>
-  ), [tabValue, theme]);
+    </Card>
+  );
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default }}>
+    <Box>
       <Navbar />
       {isLoading && <LoadingOverlay />}
       
@@ -512,88 +375,35 @@ export default function ResourcesPage() {
         autoHideDuration={6000}
         onClose={() => setError(null)}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
-        TransitionComponent={Fade}
       >
-        <Alert 
-          onClose={() => setError(null)} 
-          severity="error"
-          variant="filled"
-          sx={{ width: '100%' }}
-        >
+        <Alert onClose={() => setError(null)} severity="error">
           {error}
         </Alert>
       </Snackbar>
 
-      <Container maxWidth="lg" sx={{ mt: 4, pb: 8 }}>
-        <Typography 
-          variant="h4" 
-          gutterBottom
-          sx={{
-            fontWeight: 600,
-            color: theme.palette.primary.main,
-            textAlign: isMobile ? 'center' : 'left',
-            mb: 4,
-          }}
-        >
+      <Container maxWidth="lg" sx={{ mt: 4 }}>
+        <Typography variant="h4" gutterBottom>
           资源对接大厅
         </Typography>
 
         {stats && (
           <Box sx={{ mb: 4 }}>
-            <Typography 
-              variant="h6" 
-              gutterBottom
-              sx={{
-                fontWeight: 500,
-                color: theme.palette.text.primary,
-                mb: 2,
-              }}
-            >
+            <Typography variant="h6" gutterBottom>
               数据概览
             </Typography>
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
-                <Card 
-                  elevation={2}
-                  sx={{
-                    height: '100%',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'scale(1.02)',
-                    },
-                  }}
-                >
+                <Card>
                   <CardContent>
-                    <Typography 
-                      variant="subtitle1" 
-                      gutterBottom
-                      sx={{ fontWeight: 500 }}
-                    >
+                    <Typography variant="subtitle1" gutterBottom>
                       行业分布 (Top 3)
                     </Typography>
                     {stats[tabValue === 0 ? 'needs' : 'resources'].byIndustry
                       .slice(0, 3)
-                      .map((item: any, index: number) => (
-                        <Box 
-                          key={item.industry} 
-                          sx={{ 
-                            mb: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                            {index + 1}. {item.industry}
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              color: theme.palette.primary.main,
-                              fontWeight: 500,
-                            }}
-                          >
-                            {item.percentage.toFixed(1)}%
+                      .map((item: any) => (
+                        <Box key={item.industry} sx={{ mb: 1 }}>
+                          <Typography variant="body2">
+                            {item.industry}: {item.percentage.toFixed(1)}%
                           </Typography>
                         </Box>
                       ))}
@@ -601,47 +411,17 @@ export default function ResourcesPage() {
                 </Card>
               </Grid>
               <Grid item xs={12} md={6}>
-                <Card 
-                  elevation={2}
-                  sx={{
-                    height: '100%',
-                    transition: 'transform 0.2s',
-                    '&:hover': {
-                      transform: 'scale(1.02)',
-                    },
-                  }}
-                >
+                <Card>
                   <CardContent>
-                    <Typography 
-                      variant="subtitle1" 
-                      gutterBottom
-                      sx={{ fontWeight: 500 }}
-                    >
+                    <Typography variant="subtitle1" gutterBottom>
                       地区分布 (Top 3)
                     </Typography>
                     {stats[tabValue === 0 ? 'needs' : 'resources'].byLocation
                       .slice(0, 3)
-                      .map((item: any, index: number) => (
-                        <Box 
-                          key={item.location} 
-                          sx={{ 
-                            mb: 1,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                          }}
-                        >
-                          <Typography variant="body2" sx={{ color: theme.palette.text.secondary }}>
-                            {index + 1}. {item.location}
-                          </Typography>
-                          <Typography 
-                            variant="body2" 
-                            sx={{ 
-                              color: theme.palette.primary.main,
-                              fontWeight: 500,
-                            }}
-                          >
-                            {item.percentage.toFixed(1)}%
+                      .map((item: any) => (
+                        <Box key={item.location} sx={{ mb: 1 }}>
+                          <Typography variant="body2">
+                            {item.location}: {item.percentage.toFixed(1)}%
                           </Typography>
                         </Box>
                       ))}
@@ -662,17 +442,11 @@ export default function ResourcesPage() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 InputProps={{
-                  startAdornment: (
-                    <SearchIcon sx={{ color: theme.palette.text.secondary, mr: 1 }} />
+                  endAdornment: (
+                    <IconButton onClick={handleSearch}>
+                      <SearchIcon />
+                    </IconButton>
                   ),
-                  sx: {
-                    borderRadius: '12px',
-                    '&:hover': {
-                      '& .MuiOutlinedInput-notchedOutline': {
-                        borderColor: theme.palette.primary.main,
-                      },
-                    },
-                  },
                 }}
               />
             </Grid>
@@ -683,153 +457,69 @@ export default function ResourcesPage() {
                 startIcon={<FilterListIcon />}
                 onClick={() => setFilterDialogOpen(true)}
                 color={Object.values(activeFilters).flat().filter(Boolean).length > 0 ? 'primary' : 'inherit'}
-                sx={{
-                  borderRadius: '12px',
-                  height: '100%',
-                  borderWidth: '2px',
-                  '&:hover': {
-                    borderWidth: '2px',
-                    backgroundColor: theme.palette.primary.light,
-                    color: theme.palette.primary.contrastText,
-                  },
-                }}
               >
-                筛选条件 {Object.values(activeFilters).flat().filter(Boolean).length > 0 && 
-                  `(${Object.values(activeFilters).flat().filter(Boolean).length})`}
+                筛选条件 {Object.values(activeFilters).flat().filter(Boolean).length > 0 && `(${Object.values(activeFilters).flat().filter(Boolean).length})`}
               </Button>
             </Grid>
           </Grid>
         </Box>
 
-        <Paper 
-          elevation={0} 
-          sx={{ 
-            borderRadius: '16px',
-            overflow: 'hidden',
-            mb: 4,
-            bgcolor: theme.palette.background.paper,
-          }}
-        >
-          <Tabs 
-            value={tabValue} 
-            onChange={handleTabChange}
-            sx={{
-              borderBottom: 1,
-              borderColor: 'divider',
-              '& .MuiTab-root': {
-                textTransform: 'none',
-                fontWeight: 500,
-                fontSize: '1rem',
-                minHeight: 64,
-              },
-            }}
-          >
-            <Tab 
-              label={`合作需求 (${filteredCooperationNeeds.length})`}
-              sx={{ 
-                '&.Mui-selected': {
-                  color: theme.palette.primary.main,
-                },
-              }}
-            />
-            <Tab 
-              label={`校友资源 (${filteredAlumniResources.length})`}
-              sx={{ 
-                '&.Mui-selected': {
-                  color: theme.palette.primary.main,
-                },
-              }}
-            />
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange}>
+            <Tab label={`合作需求 (${filteredCooperationNeeds.length})`} />
+            <Tab label={`校友资源 (${filteredAlumniResources.length})`} />
           </Tabs>
-        </Paper>
+        </Box>
 
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <LoadingSection />
-          ) : (
-            <motion.div
-              key={tabValue}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <TabPanel value={tabValue} index={0}>
-                {filteredCooperationNeeds.length > 0 ? (
-                  <>
-                    {getCurrentPageData(filteredCooperationNeeds).map((item, index) => 
-                      renderCard(item, index)
-                    )}
-                    <Stack spacing={2} alignItems="center" sx={{ mt: 4 }}>
-                      <Pagination
-                        count={Math.ceil(filteredCooperationNeeds.length / pageSize)}
-                        page={page}
-                        onChange={handlePageChange}
-                        color="primary"
-                        size={isMobile ? 'small' : 'medium'}
-                        sx={{
-                          '& .MuiPaginationItem-root': {
-                            borderRadius: '8px',
-                          },
-                        }}
-                      />
-                    </Stack>
-                  </>
-                ) : (
-                  <Box 
-                    sx={{ 
-                      textAlign: 'center', 
-                      py: 8,
-                      bgcolor: theme.palette.grey[50],
-                      borderRadius: '16px',
-                    }}
-                  >
-                    <Typography color="text.secondary">
-                      没有找到符合条件的合作需求
-                    </Typography>
-                  </Box>
-                )}
-              </TabPanel>
+        {isLoading ? (
+          <LoadingSection />
+        ) : (
+          <>
+            <TabPanel value={tabValue} index={0}>
+              {filteredCooperationNeeds.length > 0 ? (
+                <>
+                  {getCurrentPageData(filteredCooperationNeeds).map(renderCard)}
+                  <Stack spacing={2} alignItems="center" sx={{ mt: 4 }}>
+                    <Pagination
+                      count={Math.ceil(filteredCooperationNeeds.length / pageSize)}
+                      page={page}
+                      onChange={handlePageChange}
+                      color="primary"
+                    />
+                  </Stack>
+                </>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography color="text.secondary">
+                    没有找到符合条件的合作需求
+                  </Typography>
+                </Box>
+              )}
+            </TabPanel>
 
-              <TabPanel value={tabValue} index={1}>
-                {filteredAlumniResources.length > 0 ? (
-                  <>
-                    {getCurrentPageData(filteredAlumniResources).map((item, index) => 
-                      renderCard(item, index)
-                    )}
-                    <Stack spacing={2} alignItems="center" sx={{ mt: 4 }}>
-                      <Pagination
-                        count={Math.ceil(filteredAlumniResources.length / pageSize)}
-                        page={page}
-                        onChange={handlePageChange}
-                        color="primary"
-                        size={isMobile ? 'small' : 'medium'}
-                        sx={{
-                          '& .MuiPaginationItem-root': {
-                            borderRadius: '8px',
-                          },
-                        }}
-                      />
-                    </Stack>
-                  </>
-                ) : (
-                  <Box 
-                    sx={{ 
-                      textAlign: 'center', 
-                      py: 8,
-                      bgcolor: theme.palette.grey[50],
-                      borderRadius: '16px',
-                    }}
-                  >
-                    <Typography color="text.secondary">
-                      没有找到符合条件的校友资源
-                    </Typography>
-                  </Box>
-                )}
-              </TabPanel>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            <TabPanel value={tabValue} index={1}>
+              {filteredAlumniResources.length > 0 ? (
+                <>
+                  {getCurrentPageData(filteredAlumniResources).map(renderCard)}
+                  <Stack spacing={2} alignItems="center" sx={{ mt: 4 }}>
+                    <Pagination
+                      count={Math.ceil(filteredAlumniResources.length / pageSize)}
+                      page={page}
+                      onChange={handlePageChange}
+                      color="primary"
+                    />
+                  </Stack>
+                </>
+              ) : (
+                <Box sx={{ textAlign: 'center', py: 4 }}>
+                  <Typography color="text.secondary">
+                    没有找到符合条件的校友资源
+                  </Typography>
+                </Box>
+              )}
+            </TabPanel>
+          </>
+        )}
       </Container>
 
       <FilterDialog

@@ -79,6 +79,8 @@ export default function Home() {
                   src="https://placehold.co/600x400/1976d2/white?text=校友服务平台"
                   alt="校友服务平台"
                   fill
+                  priority
+                  sizes="(max-width: 768px) 100vw, 50vw"
                   style={{ objectFit: 'contain' }}
                 />
               </Box>
@@ -105,6 +107,7 @@ export default function Home() {
                           src={company.logo}
                           alt={company.name}
                           fill
+                          sizes="(max-width: 768px) 100vw, 33vw"
                           style={{ objectFit: 'contain' }}
                         />
                       </Box>
