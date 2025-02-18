@@ -118,6 +118,9 @@ export function useAuth() {
 >>>>>>> upstream
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+  const { mode } = useThemeMode();
+  const theme = getTheme(mode);
+
   return (
     <AppRouterCacheProvider options={{ enableCssLayer: true }}>
       <ThemeProvider theme={theme}>
