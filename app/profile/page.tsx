@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Container,
@@ -23,11 +23,6 @@ import {
   Divider,
   LinearProgress,
   Badge,
-  Stack,
-  Skeleton,
-  Alert,
-  Snackbar,
-  Tooltip,
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import WorkIcon from '@mui/icons-material/Work';
@@ -38,15 +33,8 @@ import LocationOnIcon from '@mui/icons-material/LocationOn';
 import BusinessIcon from '@mui/icons-material/Business';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import VerifiedIcon from '@mui/icons-material/Verified';
 import Navbar from '@/components/Navbar';
-import { motion, AnimatePresence } from 'framer-motion';
-import { LoadingOverlay } from '@/components/LoadingState';
-import EditProfileDialog from '@/components/EditProfileDialog';
-import { useThemeMode } from '@/hooks/useThemeMode';
-import { Storage } from '@/utils/storage';
-import Brightness4Icon from '@mui/icons-material/Brightness4';
-import Brightness7Icon from '@mui/icons-material/Brightness7';
+import { motion } from 'framer-motion';
 
 // 模拟数据 - 用户信息
 const userInfo = {
@@ -147,128 +135,27 @@ function TabPanel(props: TabPanelProps) {
 }
 
 export default function ProfilePage() {
-  const { mode, toggleTheme } = useThemeMode();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const [tabValue, setTabValue] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as const });
-  const [editMode, setEditMode] = useState(false);
-  const [profileData, setProfileData] = useState(userInfo);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
-
-  // 从本地存储加载数据
-  useEffect(() => {
-    const loadData = async () => {
-      try {
-        setLoading(true);
-        const savedData = Storage.getItem<typeof userInfo>('profile');
-        if (savedData) {
-          setProfileData(savedData);
-        }
-        setLoading(false);
-      } catch (err) {
-        setError('加载数据失败，请稍后重试');
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, []);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
 
-  const handleEdit = () => {
-    setEditDialogOpen(true);
-  };
-
-  const handleSaveProfile = (data: any) => {
-    setProfileData(data);
-    Storage.setItem('profile', data);
-    setSnackbar({
-      open: true,
-      message: '个人信息已更新',
-      severity: 'success'
-    });
-  };
-
-  if (loading) {
-    return <LoadingOverlay />;
-  }
-
-  if (error) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
-      </Box>
-    );
-  }
-
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: theme.palette.background.default }}>
       <Navbar />
       
-      {/* 主题切换按钮 */}
-      <IconButton
-        onClick={toggleTheme}
-        sx={{
-          position: 'fixed',
-          right: 24,
-          top: 24,
-          bgcolor: theme.palette.background.paper,
-          boxShadow: theme.shadows[2],
-          zIndex: 1000,
-          '&:hover': {
-            bgcolor: theme.palette.action.hover,
-          },
-        }}
-      >
-        {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
-      </IconButton>
-
-      {/* 头部区域 - 添加动画效果 */}
+      {/* 头部区域 */}
       <Box
-        component={motion.div}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
         sx={{
           bgcolor: 'primary.main',
           color: 'white',
           py: 8,
           backgroundImage: 'linear-gradient(45deg, #1976d2 30%, #1565c0 90%)',
-          position: 'relative',
-          overflow: 'hidden',
         }}
       >
-        {/* 添加背景动画效果 */}
-        <Box
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            opacity: 0.1,
-            background: `linear-gradient(45deg, 
-              ${theme.palette.primary.light} 25%, 
-              transparent 25%, 
-              transparent 50%, 
-              ${theme.palette.primary.light} 50%, 
-              ${theme.palette.primary.light} 75%, 
-              transparent 75%, 
-              transparent)`,
-            backgroundSize: '60px 60px',
-            animation: 'moveBackground 3s linear infinite',
-            '@keyframes moveBackground': {
-              '0%': { backgroundPosition: '0 0' },
-              '100%': { backgroundPosition: '60px 60px' },
-            },
-          }}
-        />
-        
         <Container maxWidth="lg">
           <Grid container spacing={4} alignItems="center">
             <Grid item xs={12} md={3}>
@@ -277,31 +164,23 @@ export default function ProfilePage() {
                   overlap="circular"
                   anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
                   badgeContent={
-                    <Tooltip title="编辑头像">
-                      <IconButton
-                        size="small"
-                        onClick={handleEdit}
-                        sx={{
-                          bgcolor: 'white',
-                          '&:hover': { bgcolor: 'grey.100' },
-                          transition: 'all 0.2s',
-                        }}
-                      >
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Tooltip>
+                    <IconButton
+                      size="small"
+                      sx={{
+                        bgcolor: 'white',
+                        '&:hover': { bgcolor: 'grey.100' },
+                      }}
+                    >
+                      <EditIcon fontSize="small" />
+                    </IconButton>
                   }
                 >
                   <Avatar
-                    src={profileData.avatar}
+                    src={userInfo.avatar}
                     sx={{
                       width: 120,
                       height: 120,
                       border: '4px solid white',
-                      transition: 'transform 0.3s',
-                      '&:hover': {
-                        transform: 'scale(1.05)',
-                      },
                     }}
                   />
                 </Badge>
@@ -309,49 +188,25 @@ export default function ProfilePage() {
             </Grid>
             <Grid item xs={12} md={9}>
               <Box>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="h4" gutterBottom>
-                    {profileData.name}
-                  </Typography>
-                  <Tooltip title="已认证用户">
-                    <VerifiedIcon color="primary" />
-                  </Tooltip>
-                </Box>
-                <Typography variant="h6" gutterBottom sx={{ opacity: 0.9 }}>
-                  {profileData.title} · {profileData.company}
+                <Typography variant="h4" gutterBottom>
+                  {userInfo.name}
                 </Typography>
-                <Box 
-                  sx={{ 
-                    display: 'flex', 
-                    gap: 3, 
-                    flexWrap: 'wrap', 
-                    mt: 2,
-                    '& > div': {
-                      transition: 'transform 0.2s',
-                      '&:hover': {
-                        transform: 'translateY(-2px)',
-                      },
-                    },
-                  }}
-                >
-                  <Tooltip title="发送邮件">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
-                      <EmailIcon sx={{ fontSize: 20 }} />
-                      <Typography>{profileData.email}</Typography>
-                    </Box>
-                  </Tooltip>
-                  <Tooltip title="拨打电话">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
-                      <PhoneIcon sx={{ fontSize: 20 }} />
-                      <Typography>{profileData.phone}</Typography>
-                    </Box>
-                  </Tooltip>
-                  <Tooltip title="查看地图">
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}>
-                      <LocationOnIcon sx={{ fontSize: 20 }} />
-                      <Typography>{profileData.location}</Typography>
-                    </Box>
-                  </Tooltip>
+                <Typography variant="h6" gutterBottom sx={{ opacity: 0.9 }}>
+                  {userInfo.title} · {userInfo.company}
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', mt: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <EmailIcon sx={{ fontSize: 20 }} />
+                    <Typography>{userInfo.email}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PhoneIcon sx={{ fontSize: 20 }} />
+                    <Typography>{userInfo.phone}</Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <LocationOnIcon sx={{ fontSize: 20 }} />
+                    <Typography>{userInfo.location}</Typography>
+                  </Box>
                 </Box>
               </Box>
             </Grid>
@@ -364,117 +219,130 @@ export default function ProfilePage() {
         <Grid container spacing={4}>
           {/* 左侧信息栏 */}
           <Grid item xs={12} md={4}>
-            <AnimatePresence>
-              <Stack spacing={3}>
-                {/* 基本信息卡片 */}
-                <MotionCard
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="h6">教育背景</Typography>
-                      <IconButton size="small">
-                        <EditIcon fontSize="small" />
-                      </IconButton>
+            <Stack spacing={3}>
+              {/* 基本信息卡片 */}
+              <MotionCard
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                sx={{
+                  '&:hover': {
+                    boxShadow: theme.shadows[8],
+                    transform: 'translateY(-4px)',
+                    transition: 'all 0.3s ease-in-out',
+                  },
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6">教育背景</Typography>
+                    <IconButton size="small">
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                    <SchoolIcon color="primary" />
+                    <Box>
+                      <Typography variant="subtitle1">{userInfo.education}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {userInfo.major}
+                      </Typography>
                     </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                      <SchoolIcon color="primary" />
-                      <Box>
-                        <Typography variant="subtitle1">{profileData.education}</Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {profileData.major}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  </CardContent>
-                </MotionCard>
+                  </Box>
+                </CardContent>
+              </MotionCard>
 
-                {/* 技能标签卡片 */}
-                <MotionCard
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  transition={{ delay: 0.1 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="h6">专业技能</Typography>
-                      <IconButton size="small">
-                        <EditIcon fontSize="small" />
-                      </IconButton>
-                    </Box>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {profileData.skills.map((skill) => (
-                        <Chip
-                          key={skill}
-                          label={skill}
-                          color="primary"
-                          variant="outlined"
-                          sx={{
-                            borderRadius: '8px',
-                            '&:hover': {
-                              bgcolor: theme.palette.primary.light,
-                              color: theme.palette.primary.contrastText,
-                            },
-                          }}
+              {/* 技能标签卡片 */}
+              <MotionCard
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.1 }}
+                sx={{
+                  '&:hover': {
+                    boxShadow: theme.shadows[8],
+                    transform: 'translateY(-4px)',
+                    transition: 'all 0.3s ease-in-out',
+                  },
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6">专业技能</Typography>
+                    <IconButton size="small">
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </Box>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {userInfo.skills.map((skill) => (
+                      <Chip
+                        key={skill}
+                        label={skill}
+                        color="primary"
+                        variant="outlined"
+                        sx={{
+                          borderRadius: '8px',
+                          '&:hover': {
+                            bgcolor: theme.palette.primary.light,
+                            color: theme.palette.primary.contrastText,
+                          },
+                        }}
+                      />
+                    ))}
+                  </Box>
+                </CardContent>
+              </MotionCard>
+
+              {/* 通知中心卡片 */}
+              <MotionCard
+                variants={cardVariants}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: 0.2 }}
+                sx={{
+                  '&:hover': {
+                    boxShadow: theme.shadows[8],
+                    transform: 'translateY(-4px)',
+                    transition: 'all 0.3s ease-in-out',
+                  },
+                }}
+              >
+                <CardContent>
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                    <Typography variant="h6">通知中心</Typography>
+                    <Badge badgeContent={notifications.filter(n => !n.isRead).length} color="error">
+                      <NotificationsIcon color="action" />
+                    </Badge>
+                  </Box>
+                  <List>
+                    {notifications.map((notification) => (
+                      <ListItem
+                        key={notification.id}
+                        sx={{
+                          bgcolor: notification.isRead ? 'transparent' : 'action.hover',
+                          borderRadius: 1,
+                          mb: 1,
+                        }}
+                      >
+                        <ListItemText
+                          primary={notification.title}
+                          secondary={
+                            <Box>
+                              <Typography variant="body2" sx={{ mb: 1 }}>
+                                {notification.content}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                {notification.date}
+                              </Typography>
+                            </Box>
+                          }
                         />
-                      ))}
-                    </Box>
-                  </CardContent>
-                </MotionCard>
-
-                {/* 通知中心卡片 */}
-                <MotionCard
-                  variants={cardVariants}
-                  initial="hidden"
-                  animate="visible"
-                  transition={{ delay: 0.2 }}
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                      <Typography variant="h6">通知中心</Typography>
-                      <Badge badgeContent={notifications.filter(n => !n.isRead).length} color="error">
-                        <NotificationsIcon color="action" />
-                      </Badge>
-                    </Box>
-                    <List>
-                      {notifications.map((notification) => (
-                        <ListItem
-                          key={notification.id}
-                          sx={{
-                            bgcolor: notification.isRead ? 'transparent' : 'action.hover',
-                            borderRadius: 1,
-                            mb: 1,
-                          }}
-                        >
-                          <ListItemText
-                            primary={notification.title}
-                            secondary={
-                              <Box>
-                                <Typography variant="body2" sx={{ mb: 1 }}>
-                                  {notification.content}
-                                </Typography>
-                                <Typography variant="caption" color="text.secondary">
-                                  {notification.date}
-                                </Typography>
-                              </Box>
-                            }
-                          />
-                        </ListItem>
-                      ))}
-                    </List>
-                  </CardContent>
-                </MotionCard>
-              </Stack>
-            </AnimatePresence>
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </MotionCard>
+            </Stack>
           </Grid>
 
           {/* 右侧主要内容区 */}
@@ -505,7 +373,7 @@ export default function ProfilePage() {
 
               <TabPanel value={tabValue} index={0}>
                 <Box sx={{ p: 2 }}>
-                  {profileData.experience.map((exp, index) => (
+                  {userInfo.experience.map((exp, index) => (
                     <MotionCard
                       key={exp.id}
                       variants={cardVariants}
@@ -615,25 +483,6 @@ export default function ProfilePage() {
           </Grid>
         </Grid>
       </Container>
-
-      {/* 编辑对话框 */}
-      <EditProfileDialog
-        open={editDialogOpen}
-        onClose={() => setEditDialogOpen(false)}
-        onSave={handleSaveProfile}
-        initialData={profileData}
-      />
-
-      {/* 全局消息提示 */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={4000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert severity={snackbar.severity} sx={{ width: '100%' }}>
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 } 
