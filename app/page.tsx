@@ -1,101 +1,169 @@
-import Image from "next/image";
+'use client';
+
+import { Box, Container, Grid, Card, CardContent, Typography, Button } from '@mui/material';
+import BusinessIcon from '@mui/icons-material/Business';
+import WorkIcon from '@mui/icons-material/Work';
+import Navbar from '@/components/Navbar';
+import Image from 'next/image';
+import Link from 'next/link';
+
+// 模拟数据
+const featuredCompanies = [
+  { id: 1, name: '腾讯科技', logo: 'https://placehold.co/200x100/1976d2/white?text=腾讯科技', description: '全球领先的互联网科技公司' },
+  { id: 2, name: '阿里巴巴', logo: 'https://placehold.co/200x100/1976d2/white?text=阿里巴巴', description: '全球最大的电商平台' },
+  { id: 3, name: '字节跳动', logo: 'https://placehold.co/200x100/1976d2/white?text=字节跳动', description: '创新的互联网企业' },
+];
+
+const hotJobs = [
+  { id: 1, title: '高级前端工程师', company: '腾讯科技', salary: '25k-50k' },
+  { id: 2, title: '产品经理', company: '阿里巴巴', salary: '20k-40k' },
+  { id: 3, title: '算法工程师', company: '字节跳动', salary: '30k-60k' },
+];
+
+const latestEvents = [
+  { id: 1, title: '2024校友企业招聘会', date: '2024-03-20', location: '线上' },
+  { id: 2, title: '创业经验分享沙龙', date: '2024-03-25', location: '创新中心' },
+  { id: 3, title: '行业趋势分析会', date: '2024-03-30', location: '报告厅' },
+];
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+    <main>
+      <Navbar />
+      
+      {/* 核心入口区域 */}
+      <Box 
+        sx={{ 
+          bgcolor: 'primary.main', 
+          color: 'white',
+          py: 8,
+          backgroundImage: 'linear-gradient(45deg, #1976d2 30%, #1565c0 90%)',
+        }}
+      >
+        <Container maxWidth="lg">
+          <Grid container spacing={4}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h3" component="h1" gutterBottom>
+                校友服务平台
+              </Typography>
+              <Typography variant="h6" paragraph>
+                连接校友资源，助力职业发展
+              </Typography>
+              <Box sx={{ mt: 4 }}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  size="large"
+                  component={Link}
+                  href="/enterprise"
+                  startIcon={<BusinessIcon />}
+                  sx={{ mr: 2, mb: { xs: 2, sm: 0 } }}
+                >
+                  企业服务
+                </Button>
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  size="large"
+                  component={Link}
+                  href="/career"
+                  startIcon={<WorkIcon />}
+                >
+                  就业支持
+                </Button>
+              </Box>
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Box sx={{ position: 'relative', height: 300 }}>
+                <Image
+                  src="https://placehold.co/600x400/1976d2/white?text=校友服务平台"
+                  alt="校友服务平台"
+                  fill
+                  style={{ objectFit: 'contain' }}
+                />
+              </Box>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+      {/* 动态展示区域 */}
+      <Container maxWidth="lg" sx={{ my: 8 }}>
+        <Grid container spacing={4}>
+          {/* 校友企业轮播 */}
+          <Grid item xs={12}>
+            <Typography variant="h5" gutterBottom>
+              重点校友企业
+            </Typography>
+            <Grid container spacing={2}>
+              {featuredCompanies.map((company) => (
+                <Grid item xs={12} sm={4} key={company.id}>
+                  <Card>
+                    <CardContent>
+                      <Box sx={{ height: 60, position: 'relative', mb: 2 }}>
+                        <Image
+                          src={company.logo}
+                          alt={company.name}
+                          fill
+                          style={{ objectFit: 'contain' }}
+                        />
+                      </Box>
+                      <Typography variant="h6" gutterBottom>
+                        {company.name}
+                      </Typography>
+                      <Typography color="text.secondary">
+                        {company.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Grid>
+
+          {/* 热门招聘岗位 */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" gutterBottom>
+              热门招聘岗位
+            </Typography>
+            <Card>
+              <CardContent>
+                {hotJobs.map((job) => (
+                  <Box key={job.id} sx={{ mb: 2, pb: 2, borderBottom: '1px solid #eee' }}>
+                    <Typography variant="h6" gutterBottom>
+                      {job.title}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      {job.company} · {job.salary}
+                    </Typography>
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+
+          {/* 最新行业活动 */}
+          <Grid item xs={12} md={6}>
+            <Typography variant="h5" gutterBottom>
+              最新行业活动
+            </Typography>
+            <Card>
+              <CardContent>
+                {latestEvents.map((event) => (
+                  <Box key={event.id} sx={{ mb: 2, pb: 2, borderBottom: '1px solid #eee' }}>
+                    <Typography variant="h6" gutterBottom>
+                      {event.title}
+                    </Typography>
+                    <Typography color="text.secondary">
+                      {event.date} · {event.location}
+                    </Typography>
+                  </Box>
+                ))}
+              </CardContent>
+            </Card>
+          </Grid>
+        </Grid>
+      </Container>
+    </main>
   );
 }
