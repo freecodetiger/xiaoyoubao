@@ -1,12 +1,20 @@
 'use client';
 
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
+import { useState } from 'react';
+import {
+  AppBar,
+  Box,
+  Toolbar,
+  IconButton,
+  Typography,
+  Menu,
+  Container,
+  Avatar,
+  Button,
+  Tooltip,
+  MenuItem,
+  Divider,
+} from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
@@ -26,27 +34,42 @@ const pages = [
   { title: '个人中心', href: '/profile' },
 ];
 
-function Navbar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+export default function Navbar() {
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
+  const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
+  };
+  const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorElUser(event.currentTarget);
   };
 
   const handleCloseNavMenu = () => {
     setAnchorElNav(null);
   };
 
+  const handleCloseUserMenu = () => {
+    setAnchorElUser(null);
+  };
+
+  const handleLogout = async () => {
+    handleCloseUserMenu();
+    await logout();
+  };
+
   return (
-    <AppBar position="static" color="default" elevation={1}>
+    <AppBar position="fixed">
       <Container maxWidth="xl">
         <Toolbar disableGutters>
-          <SchoolIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
+          {/* Logo - Desktop */}
           <Typography
             variant="h6"
             noWrap
             component={Link}
-            href="/"
+            href="/dashboard"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -58,10 +81,10 @@ function Navbar() {
             校友宝
           </Typography>
 
+          {/* Mobile menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              aria-label="navigation menu"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -110,13 +133,13 @@ function Navbar() {
               ))}
             </Menu>
           </Box>
-          
-          <SchoolIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
+
+          {/* Logo - Mobile */}
           <Typography
             variant="h5"
             noWrap
             component={Link}
-            href="/"
+            href="/dashboard"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -128,7 +151,8 @@ function Navbar() {
           >
             校友宝
           </Typography>
-          
+
+          {/* Desktop menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
               <Button
@@ -152,16 +176,48 @@ function Navbar() {
             ))}
           </Box>
 
+          {/* User menu */}
           <Box sx={{ flexGrow: 0 }}>
-            <Button
-              variant="contained"
-              color="primary"
-              component={Link}
-              href="/login"
-              sx={{ ml: 2 }}
+            <Tooltip title="打开设置">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
+                <Avatar alt={user?.name} src="/avatar.png" />
+              </IconButton>
+            </Tooltip>
+            <Menu
+              sx={{ mt: '45px' }}
+              id="menu-appbar"
+              anchorEl={anchorElUser}
+              anchorOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              keepMounted
+              transformOrigin={{
+                vertical: 'top',
+                horizontal: 'right',
+              }}
+              open={Boolean(anchorElUser)}
+              onClose={handleCloseUserMenu}
             >
-              登录
-            </Button>
+              <MenuItem onClick={() => {
+                handleCloseUserMenu();
+                router.push('/profile');
+              }}>
+                <Typography textAlign="center">个人资料</Typography>
+              </MenuItem>
+              <MenuItem onClick={() => {
+                handleCloseUserMenu();
+                router.push('/settings');
+              }}>
+                <Typography textAlign="center">设置</Typography>
+              </MenuItem>
+              <Divider />
+              <MenuItem onClick={handleLogout}>
+                <Typography textAlign="center" color="error">
+                  退出登录
+                </Typography>
+              </MenuItem>
+            </Menu>
           </Box>
         </Toolbar>
       </Container>
