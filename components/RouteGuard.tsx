@@ -1,51 +1,43 @@
 'use client';
 
 import { useEffect } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/app/providers';
-import { CircularProgress, Box } from '@mui/material';
+import LoadingSpinner from './LoadingSpinner';
 
 const publicPaths = ['/auth/login', '/auth/register', '/auth/forgot-password'];
 
 export default function RouteGuard({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
-  const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
+    console.log('RouteGuard effect:', { user, loading, pathname });
+    
     if (!loading) {
       // 如果用户未登录且当前路径不是公开路径
-      if (!user && !publicPaths.includes(pathname)) {
-        router.push('/auth/login');
+      if (!user && !publicPaths.includes(pathname) && pathname !== '/') {
+        console.log('Redirecting to login page');
+        window.location.href = '/auth/login';
       }
       // 如果用户已登录且当前路径是公开路径
       else if (user && publicPaths.includes(pathname)) {
-        router.push('/dashboard');
+        console.log('Redirecting to dashboard');
+        window.location.href = '/dashboard';
       }
     }
-  }, [user, loading, pathname, router]);
+  }, [user, loading, pathname]);
 
   // 显示加载状态
   if (loading) {
-    return (
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          minHeight: '100vh',
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
+    return <LoadingSpinner fullscreen message="正在加载..." />;
   }
 
   // 如果是公开路径或用户已登录，显示内容
-  if (publicPaths.includes(pathname) || user) {
+  if (publicPaths.includes(pathname) || user || pathname === '/') {
     return <>{children}</>;
   }
 
-  // 其他情况不显示任何内容
-  return null;
+  // 其他情况显示加载状态
+  return <LoadingSpinner fullscreen message="正在验证身份..." />;
 } 

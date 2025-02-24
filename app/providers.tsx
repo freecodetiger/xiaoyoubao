@@ -6,7 +6,6 @@ import CssBaseline from '@mui/material/CssBaseline';
 import { getTheme } from '@/theme';
 import { useThemeMode } from '@/hooks/useThemeMode';
 import { createContext, useContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
 
 interface User {
   id: string;
@@ -30,73 +29,112 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
 
-  useEffect(() => {
-    // 检查本地存储的token
-    const token = localStorage.getItem('token');
-    if (token) {
-      // TODO: 验证token并获取用户信息
-      fetch('/api/auth/me', {
+  // 获取用户信息的函数
+  const fetchUserInfo = async (token: string) => {
+    try {
+      console.log('Fetching user info with token:', token);
+      const response = await fetch('/api/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`,
         },
-      })
-        .then((res) => res.json())
-        .then((data) => {
-          setUser(data.user);
-        })
-        .catch(() => {
-          localStorage.removeItem('token');
-        })
-        .finally(() => {
-          setLoading(false);
-        });
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user info');
+      }
+
+      const data = await response.json();
+      console.log('User info response:', data);
+
+      if (data.user) {
+        setUser(data.user);
+      } else {
+        throw new Error('No user data received');
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      localStorage.removeItem('token');
+      setUser(null);
+    }
+  };
+
+  // 初始化时检查token
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    console.log('Initial token check:', token ? 'Token exists' : 'No token');
+    
+    if (token) {
+      fetchUserInfo(token).finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    try {
+      console.log('Attempting login...', { email });
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-    if (!response.ok) {
-      throw new Error('登录失败');
+      const data = await response.json();
+      console.log('Login response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || '登录失败');
+      }
+
+      if (!data.token || !data.user) {
+        throw new Error('Invalid response format');
+      }
+
+      localStorage.setItem('token', data.token);
+      setUser(data.user);
+      console.log('Login successful, redirecting to dashboard...');
+      
+      // 使用 window.location.href 进行页面跳转
+      window.location.href = '/dashboard';
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    localStorage.setItem('token', data.token);
-    setUser(data.user);
-    router.push('/dashboard');
   };
 
   const logout = async () => {
+    console.log('Logging out...');
     localStorage.removeItem('token');
     setUser(null);
-    router.push('/auth/login');
+    window.location.href = '/auth/login';
   };
 
   const register = async (userData: any) => {
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(userData),
-    });
+    try {
+      console.log('Attempting registration...', userData);
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
 
-    if (!response.ok) {
-      throw new Error('注册失败');
+      const data = await response.json();
+      console.log('Registration response:', data);
+
+      if (!response.ok) {
+        throw new Error(data.error || '注册失败');
+      }
+
+      window.location.href = '/auth/login';
+    } catch (error) {
+      console.error('Registration error:', error);
+      throw error;
     }
-
-    const data = await response.json();
-    router.push('/auth/login');
   };
 
   return (

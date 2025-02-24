@@ -1,192 +1,226 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Box, Typography, Link as MuiLink, Alert } from '@mui/material';
 import Link from 'next/link';
-import { TextField, Button, Card, CardContent, Typography, Box, Alert, MenuItem } from '@mui/material';
+import { useAuth } from '@/app/providers';
+import AuthLayout from '@/components/AuthLayout';
+import FormInput from '@/components/FormInput';
+import SubmitButton from '@/components/SubmitButton';
+
+interface RegisterFormData {
+  email: string;
+  password: string;
+  confirmPassword: string;
+  name: string;
+  graduationYear: string;
+  major: string;
+  userType: 'alumni' | 'enterprise';
+}
 
 export default function RegisterPage() {
-  const router = useRouter();
-  const [formData, setFormData] = useState({
+  const { register } = useAuth();
+  const [formData, setFormData] = useState<RegisterFormData>({
     email: '',
     password: '',
     confirmPassword: '',
     name: '',
     graduationYear: '',
     major: '',
-    userType: 'alumni', // 'alumni' or 'enterprise'
+    userType: 'alumni',
   });
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const validateForm = () => {
+    const newErrors: Partial<RegisterFormData> = {};
+    if (!formData.email) {
+      newErrors.email = '请输入邮箱';
+    } else if (!/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i.test(formData.email)) {
+      newErrors.email = '请输入有效的邮箱地址';
+    }
+    if (!formData.name) {
+      newErrors.name = '请输入姓名';
+    }
+    if (!formData.password) {
+      newErrors.password = '请输入密码';
+    } else if (formData.password.length < 6) {
+      newErrors.password = '密码长度至少为6位';
+    }
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = '请确认密码';
+    } else if (formData.password !== formData.confirmPassword) {
+      newErrors.confirmPassword = '两次输入的密码不一致';
+    }
+    if (formData.userType === 'alumni') {
+      if (!formData.graduationYear) {
+        newErrors.graduationYear = '请输入毕业年份';
+      }
+      if (!formData.major) {
+        newErrors.major = '请输入专业';
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-
-    // 基本验证
-    if (formData.password !== formData.confirmPassword) {
-      setError('两次输入的密码不一致');
+    setError(null);
+    
+    if (!validateForm()) {
       return;
     }
 
     try {
-      // TODO: 实现实际的注册API调用
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('注册失败，请检查您的输入');
-      }
-
-      const data = await response.json();
-      // TODO: 处理注册成功，存储token等
-      router.push('/auth/login');
+      setLoading(true);
+      await register(formData);
+      setSuccess(true);
+      // 注册成功后的重定向由 AuthContext 处理
     } catch (err) {
-      setError(err instanceof Error ? err.message : '注册过程中发生错误');
+      setError(err instanceof Error ? err.message : '注册失败，请稍后重试');
+      setSuccess(false);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        bgcolor: 'background.default',
-        py: 4,
-      }}
-    >
-      <Card sx={{ maxWidth: 500, width: '100%', mx: 2 }}>
-        <CardContent sx={{ p: 4 }}>
-          <Typography variant="h4" component="h1" align="center" gutterBottom>
-            注册校友宝
-          </Typography>
-          
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+    <AuthLayout maxWidth="md">
+      <Box
+        component="form"
+        onSubmit={handleSubmit}
+        sx={{
+          width: '100%',
+          maxWidth: 600,
+          mx: 'auto',
+        }}
+      >
+        <Typography
+          variant="h4"
+          sx={{
+            mb: 3,
+            fontWeight: 700,
+            textAlign: 'center',
+            background: 'linear-gradient(45deg, #2196F3, #21CBF3)',
+            backgroundClip: 'text',
+            WebkitBackgroundClip: 'text',
+            color: 'transparent',
+          }}
+        >
+          加入校友宝
+        </Typography>
+
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+
+        <Box sx={{ mb: 3 }}>
+          <FormInput
+            select
+            label="用户类型"
+            value={formData.userType}
+            onChange={(e) => setFormData({ ...formData, userType: e.target.value as 'alumni' | 'enterprise' })}
+            error={errors.userType}
+            tooltip="请选择您的用户类型"
+          >
+            <option value="alumni">校友</option>
+            <option value="enterprise">企业</option>
+          </FormInput>
+
+          <FormInput
+            label="邮箱"
+            type="email"
+            value={formData.email}
+            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+            error={errors.email}
+            placeholder="请输入邮箱"
+            tooltip="此邮箱将用于登录和接收通知"
+          />
+
+          <FormInput
+            label="姓名"
+            value={formData.name}
+            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+            error={errors.name}
+            placeholder="请输入姓名"
+          />
+
+          {formData.userType === 'alumni' && (
+            <>
+              <FormInput
+                label="毕业年份"
+                type="number"
+                value={formData.graduationYear}
+                onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
+                error={errors.graduationYear}
+                placeholder="请输入毕业年份"
+                tooltip="例如：2020"
+              />
+
+              <FormInput
+                label="专业"
+                value={formData.major}
+                onChange={(e) => setFormData({ ...formData, major: e.target.value })}
+                error={errors.major}
+                placeholder="请输入专业"
+                tooltip="例如：计算机科学"
+              />
+            </>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <TextField
-              select
-              fullWidth
-              label="用户类型"
-              name="userType"
-              value={formData.userType}
-              onChange={handleChange}
-              margin="normal"
-              required
-            >
-              <MenuItem value="alumni">校友</MenuItem>
-              <MenuItem value="enterprise">企业</MenuItem>
-            </TextField>
+          <FormInput
+            label="密码"
+            value={formData.password}
+            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+            error={errors.password}
+            placeholder="请输入密码"
+            showPasswordToggle
+            tooltip="密码长度至少为6位"
+          />
 
-            <TextField
-              fullWidth
-              label="邮箱"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              margin="normal"
-              required
-              autoComplete="email"
-            />
+          <FormInput
+            label="确认密码"
+            value={formData.confirmPassword}
+            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+            error={errors.confirmPassword}
+            placeholder="请再次输入密码"
+            showPasswordToggle
+          />
+        </Box>
 
-            <TextField
-              fullWidth
-              label="姓名"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              margin="normal"
-              required
-            />
+        <SubmitButton
+          type="submit"
+          loading={loading}
+          success={success}
+          successText="注册成功"
+        >
+          注册
+        </SubmitButton>
 
-            {formData.userType === 'alumni' && (
-              <>
-                <TextField
-                  fullWidth
-                  label="毕业年份"
-                  name="graduationYear"
-                  type="number"
-                  value={formData.graduationYear}
-                  onChange={handleChange}
-                  margin="normal"
-                  required
-                />
-
-                <TextField
-                  fullWidth
-                  label="专业"
-                  name="major"
-                  value={formData.major}
-                  onChange={handleChange}
-                  margin="normal"
-                  required
-                />
-              </>
-            )}
-            
-            <TextField
-              fullWidth
-              label="密码"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              margin="normal"
-              required
-              autoComplete="new-password"
-            />
-
-            <TextField
-              fullWidth
-              label="确认密码"
-              name="confirmPassword"
-              type="password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              margin="normal"
-              required
-              autoComplete="new-password"
-            />
-
-            <Button
-              fullWidth
-              type="submit"
-              variant="contained"
-              size="large"
-              sx={{ mt: 3 }}
-            >
-              注册
-            </Button>
-
-            <Box sx={{ mt: 2, textAlign: 'center' }}>
-              <Link href="/auth/login" style={{ textDecoration: 'none' }}>
-                <Typography color="primary">
-                  已有账号？立即登录
-                </Typography>
-              </Link>
-            </Box>
-          </form>
-        </CardContent>
-      </Card>
-    </Box>
+        <Box
+          sx={{
+            mt: 2,
+            textAlign: 'center',
+          }}
+        >
+          <MuiLink
+            component={Link}
+            href="/auth/login"
+            variant="body2"
+            sx={{
+              textDecoration: 'none',
+              '&:hover': { textDecoration: 'underline' },
+            }}
+          >
+            已有账号？立即登录
+          </MuiLink>
+        </Box>
+      </Box>
+    </AuthLayout>
   );
 } 

@@ -18,30 +18,52 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
+    console.log('Login attempt:', { email, password });
+
     // 在实际应用中，这里应该进行密码加密比对
     const user = mockUsers.find(u => u.email === email && u.password === password);
 
+    console.log('Found user:', user);
+
     if (!user) {
-      return NextResponse.json(
-        { error: '邮箱或密码错误' },
-        { status: 401 }
+      console.log('Login failed: Invalid credentials');
+      return new NextResponse(
+        JSON.stringify({ error: '邮箱或密码错误' }),
+        { 
+          status: 401,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
     }
 
     // 在实际应用中，这里应该使用proper JWT签名
     const token = btoa(JSON.stringify({ userId: user.id, email: user.email }));
 
+    // 不要返回密码
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json({
+    const response = {
       token,
       user: userWithoutPassword,
-    });
+    };
+
+    console.log('Login successful:', response);
+
+    return new NextResponse(
+      JSON.stringify(response),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    );
   } catch (error) {
     console.error('Login error:', error);
-    return NextResponse.json(
-      { error: '登录过程中发生错误' },
-      { status: 500 }
+    return new NextResponse(
+      JSON.stringify({ error: '登录过程中发生错误' }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     );
   }
 } 

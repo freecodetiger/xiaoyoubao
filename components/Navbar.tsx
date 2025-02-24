@@ -14,22 +14,33 @@ import {
   Tooltip,
   MenuItem,
   Divider,
+  Badge,
+  useTheme,
 } from '@mui/material';
-import MenuIcon from '@mui/icons-material/Menu';
+import {
+  Menu as MenuIcon,
+  Notifications as NotificationsIcon,
+  Mail as MailIcon,
+  Brightness4 as Brightness4Icon,
+  Brightness7 as Brightness7Icon,
+} from '@mui/icons-material';
 import { useAuth } from '@/app/providers';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useThemeMode } from '@/hooks/useThemeMode';
 
 const pages = [
-  { title: '首页', path: '/dashboard' },
-  { title: '企业服务', path: '/enterprise' },
-  { title: '就业支持', path: '/career' },
-  { title: '资源中心', path: '/resources' },
+  { title: '首页', path: '/dashboard', description: '查看最新动态和推荐' },
+  { title: '企业服务', path: '/enterprise', description: '寻找商业合作机会' },
+  { title: '就业支持', path: '/career', description: '发现职业发展机会' },
+  { title: '资源中心', path: '/resources', description: '获取学习和交流资源' },
 ];
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const theme = useTheme();
+  const { mode, toggleMode } = useThemeMode();
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
 
@@ -54,7 +65,7 @@ export default function Navbar() {
   };
 
   return (
-    <AppBar position="fixed">
+    <AppBar position="fixed" elevation={0} sx={{ backdropFilter: 'blur(8px)' }}>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           {/* Logo - Desktop */}
@@ -69,6 +80,7 @@ export default function Navbar() {
               fontWeight: 700,
               color: 'inherit',
               textDecoration: 'none',
+              letterSpacing: '.1rem',
             }}
           >
             校友宝
@@ -78,6 +90,7 @@ export default function Navbar() {
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
+              aria-label="menu"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -111,7 +124,12 @@ export default function Navbar() {
                     router.push(page.path);
                   }}
                 >
-                  <Typography textAlign="center">{page.title}</Typography>
+                  <Box>
+                    <Typography variant="subtitle1">{page.title}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {page.description}
+                    </Typography>
+                  </Box>
                 </MenuItem>
               ))}
             </Menu>
@@ -130,6 +148,7 @@ export default function Navbar() {
               fontWeight: 700,
               color: 'inherit',
               textDecoration: 'none',
+              letterSpacing: '.1rem',
             }}
           >
             校友宝
@@ -138,21 +157,55 @@ export default function Navbar() {
           {/* Desktop menu */}
           <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
             {pages.map((page) => (
-              <Button
-                key={page.path}
-                onClick={() => router.push(page.path)}
-                sx={{ my: 2, color: 'white', display: 'block' }}
-              >
-                {page.title}
-              </Button>
+              <Tooltip key={page.path} title={page.description} arrow>
+                <Button
+                  onClick={() => router.push(page.path)}
+                  sx={{
+                    my: 2,
+                    mx: 1,
+                    color: 'inherit',
+                    display: 'block',
+                    '&:hover': {
+                      backgroundColor: 'rgba(0, 0, 0, 0.04)',
+                    },
+                  }}
+                >
+                  {page.title}
+                </Button>
+              </Tooltip>
             ))}
           </Box>
 
-          {/* User menu */}
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="打开设置">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt={user?.name} src="/avatar.png" />
+          {/* Action buttons */}
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <IconButton color="inherit" onClick={toggleMode}>
+              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
+            
+            <IconButton color="inherit">
+              <Badge badgeContent={4} color="error">
+                <MailIcon />
+              </Badge>
+            </IconButton>
+
+            <IconButton color="inherit">
+              <Badge badgeContent={2} color="error">
+                <NotificationsIcon />
+              </Badge>
+            </IconButton>
+
+            {/* User menu */}
+            <Tooltip title="个人设置">
+              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0, ml: 1 }}>
+                <Avatar
+                  alt={user?.name}
+                  src="/avatar.png"
+                  sx={{
+                    width: 40,
+                    height: 40,
+                    border: `2px solid ${theme.palette.primary.main}`,
+                  }}
+                />
               </IconButton>
             </Tooltip>
             <Menu
@@ -171,23 +224,30 @@ export default function Navbar() {
               open={Boolean(anchorElUser)}
               onClose={handleCloseUserMenu}
             >
+              <Box sx={{ px: 2, py: 1 }}>
+                <Typography variant="subtitle1" noWrap>
+                  {user?.name}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" noWrap>
+                  {user?.email}
+                </Typography>
+              </Box>
+              <Divider />
               <MenuItem onClick={() => {
                 handleCloseUserMenu();
                 router.push('/profile');
               }}>
-                <Typography textAlign="center">个人资料</Typography>
+                <Typography>个人资料</Typography>
               </MenuItem>
               <MenuItem onClick={() => {
                 handleCloseUserMenu();
                 router.push('/settings');
               }}>
-                <Typography textAlign="center">设置</Typography>
+                <Typography>设置</Typography>
               </MenuItem>
               <Divider />
               <MenuItem onClick={handleLogout}>
-                <Typography textAlign="center" color="error">
-                  退出登录
-                </Typography>
+                <Typography color="error">退出登录</Typography>
               </MenuItem>
             </Menu>
           </Box>
