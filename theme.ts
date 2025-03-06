@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { createTheme, ThemeOptions } from '@mui/material/styles';
 
 const getDesignTokens = (mode: 'light' | 'dark'): ThemeOptions => ({
@@ -115,11 +116,42 @@ const getDesignTokens = (mode: 'light' | 'dark'): ThemeOptions => ({
       styleOverrides: {
         root: {
           '& .MuiOutlinedInput-root': {
+=======
+import { createTheme, Theme } from '@mui/material/styles';
+
+export function getTheme(mode: 'light' | 'dark'): Theme {
+  return createTheme({
+    palette: {
+      mode,
+      primary: {
+        main: '#1976d2',
+      },
+      secondary: {
+        main: '#dc004e',
+      },
+      background: {
+        default: mode === 'light' ? '#f5f5f5' : '#121212',
+        paper: mode === 'light' ? '#ffffff' : '#1e1e1e',
+      },
+    },
+    components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: 'none',
+          },
+        },
+      },
+      MuiCard: {
+        styleOverrides: {
+          root: {
+>>>>>>> upstream
             borderRadius: 8,
           },
         },
       },
     },
+<<<<<<< HEAD
     MuiChip: {
       styleOverrides: {
         root: {
@@ -141,3 +173,7 @@ const getDesignTokens = (mode: 'light' | 'dark'): ThemeOptions => ({
 });
 
 export const getTheme = (mode: 'light' | 'dark') => createTheme(getDesignTokens(mode)); 
+=======
+  });
+} 
+>>>>>>> upstream

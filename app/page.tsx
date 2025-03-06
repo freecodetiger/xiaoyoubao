@@ -1,5 +1,6 @@
 'use client';
 
+<<<<<<< HEAD
 import { Box, Container, Grid, Card, CardContent, Typography, Button } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import WorkIcon from '@mui/icons-material/Work';
@@ -186,4 +187,17 @@ export default function Home() {
       </Container>
     </main>
   );
+=======
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+
+export default function HomePage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace('/dashboard');
+  }, [router]);
+
+  return null;
+>>>>>>> upstream
 }
