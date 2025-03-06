@@ -101,8 +101,8 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
             label="选择模型"
             onChange={handleModelChange}
           >
-            <MenuItem value={ModelType.KIMI}>Kimi</MenuItem>
-            <MenuItem value={ModelType.BAIDU}>文心一言</MenuItem>
+            <MenuItem value={ModelType.KIMI}>法律大模型</MenuItem>
+            <MenuItem value={ModelType.BAIDU}>企业招聘大模型</MenuItem>
           </Select>
         </FormControl>
         

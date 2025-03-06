@@ -17,19 +17,20 @@ import {
   useMediaQuery,
   Snackbar,
   Alert,
-  FormControlLabel,
-  Switch
+  Badge
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import AddIcon from '@mui/icons-material/Add';
 import MenuIcon from '@mui/icons-material/Menu';
 import MicIcon from '@mui/icons-material/Mic';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
-import FormatClearIcon from '@mui/icons-material/FormatClear';
+import ClearIcon from '@mui/icons-material/Clear';
+import ImageIcon from '@mui/icons-material/Image';
+import DescriptionIcon from '@mui/icons-material/Description';
 import Navbar from '@/components/Navbar';
 import ChatMessage, { Message } from '@/components/ChatMessage';
 import ChatSidebar, { Session } from '@/components/ChatSidebar';
-import { ChatService, ModelType } from '@/utils/ChatService';
+import { ChatService, ModelType, FileAttachment } from '@/utils/ChatService';
 
 // 模拟的历史会话数据
 const mockHistorySessions: Session[] = [
@@ -83,9 +84,10 @@ export default function EnterpriseAI() {
   const [historySessions, setHistorySessions] = useState<Session[]>(mockHistorySessions);
   const [currentModelType, setCurrentModelType] = useState<ModelType>(ModelType.KIMI);
   const [error, setError] = useState<string | null>(null);
-  const [markdownMode, setMarkdownMode] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // 初始化欢迎消息
   useEffect(() => {
@@ -109,16 +111,46 @@ export default function EnterpriseAI() {
     scrollToBottom();
   }, [messages]);
 
+  // 处理文件选择
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      // 检查文件类型
+      const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'text/plain', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword'];
+      
+      if (validTypes.includes(file.type) || file.name.endsWith('.txt')) {
+        setSelectedFile(file);
+      } else {
+        setError('不支持的文件类型。请上传图片、TXT或Word文档。');
+      }
+    }
+  };
+
+  // 清除选择的文件
+  const handleClearFile = () => {
+    setSelectedFile(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  // 触发文件选择对话框
+  const handleAttachFileClick = () => {
+    fileInputRef.current?.click();
+  };
+
   // 发送消息
   const handleSendMessage = async () => {
-    if (inputValue.trim() === '') return;
+    if (inputValue.trim() === '' && !selectedFile) return;
     
     // 添加用户消息
     const userMessage: Message = {
       id: Date.now().toString(),
-      content: inputValue,
+      content: inputValue || (selectedFile ? `[上传文件: ${selectedFile.name}]` : ''),
       sender: 'user',
-      timestamp: new Date()
+      timestamp: new Date(),
+      file: selectedFile || undefined
     };
     
     setMessages(prev => [...prev, userMessage]);
@@ -134,17 +166,29 @@ export default function EnterpriseAI() {
         content: msg.content
       }));
       
-      // 添加用户最新消息
+      // 添加用户最新消息（不包含文件，文件会在后面单独处理）
       apiMessages.push({
         role: 'user',
         content: userMessage.content
       });
       
+      // 处理文件
+      let fileAttachment: FileAttachment | undefined;
+      if (selectedFile) {
+        const processedFile = await ChatService.processFile(selectedFile);
+        if (!processedFile) {
+          setError('文件处理失败，请重试。');
+        } else {
+          fileAttachment = processedFile;
+        }
+      }
+      
       // 调用API
       const response = await ChatService.sendMessage(
         currentModelType,
         apiMessages,
-        userMessage.content
+        userMessage.content,
+        fileAttachment
       );
       
       if (response.error) {
@@ -164,11 +208,15 @@ export default function EnterpriseAI() {
       
       // 如果是新会话，更新标题
       if (currentSession.id === 'new') {
+        const title = inputValue.trim() || (selectedFile ? `关于${selectedFile.name}的分析` : '新对话');
         setCurrentSession(prev => ({
           ...prev,
-          title: userMessage.content.substring(0, 30) + (userMessage.content.length > 30 ? '...' : '')
+          title: title.substring(0, 30) + (title.length > 30 ? '...' : '')
         }));
       }
+      
+      // 清除已上传的文件
+      handleClearFile();
     } catch (err) {
       setError('发送消息时出错');
       console.error('发送消息错误:', err);
@@ -405,17 +453,29 @@ export default function EnterpriseAI() {
             }}
           >
             <Box sx={{ mb: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <FormControlLabel
-                control={
-                  <Switch 
-                    checked={markdownMode}
-                    onChange={(e) => setMarkdownMode(e.target.checked)}
-                    size="small"
-                  />
-                }
-                label={<Typography variant="caption">Markdown模式</Typography>}
-              />
-              <Typography variant="caption" color="text.secondary">
+              {selectedFile && (
+                <Box sx={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  bgcolor: 'action.hover', 
+                  borderRadius: 1,
+                  px: 1,
+                  py: 0.5
+                }}>
+                  {selectedFile.type.startsWith('image/') ? (
+                    <ImageIcon fontSize="small" sx={{ mr: 0.5 }} />
+                  ) : (
+                    <DescriptionIcon fontSize="small" sx={{ mr: 0.5 }} />
+                  )}
+                  <Typography variant="caption" noWrap sx={{ maxWidth: 150 }}>
+                    {selectedFile.name}
+                  </Typography>
+                  <IconButton size="small" onClick={handleClearFile}>
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              )}
+              <Typography variant="caption" color="text.secondary" sx={{ ml: 'auto' }}>
                 当前模型: {currentModelType === ModelType.KIMI ? 'Kimi' : '文心一言'}
               </Typography>
             </Box>
@@ -426,7 +486,7 @@ export default function EnterpriseAI() {
                 multiline
                 maxRows={6}
                 minRows={2}
-                placeholder={`输入您的问题... ${markdownMode ? '(支持Markdown语法)' : ''}`}
+                placeholder="输入您的问题..."
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyPress={(e) => {
@@ -447,7 +507,7 @@ export default function EnterpriseAI() {
                       disabled={inputValue === ''}
                       size="small"
                     >
-                      <FormatClearIcon fontSize="small" />
+                      <ClearIcon fontSize="small" />
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="语音输入">
@@ -457,16 +517,26 @@ export default function EnterpriseAI() {
                   </Tooltip>
                 </Box>
                 <Box sx={{ display: 'flex' }}>
-                  <Tooltip title="上传文件 (支持PDF/TXT/图片)">
-                    <IconButton color="primary" size="small">
-                      <AttachFileIcon fontSize="small" />
+                  <Tooltip title="上传文件 (支持图片/TXT/Word)">
+                    <IconButton 
+                      color="primary" 
+                      size="small"
+                      onClick={handleAttachFileClick}
+                    >
+                      {selectedFile ? (
+                        <Badge color="success" variant="dot">
+                          <AttachFileIcon fontSize="small" />
+                        </Badge>
+                      ) : (
+                        <AttachFileIcon fontSize="small" />
+                      )}
                     </IconButton>
                   </Tooltip>
                   <Tooltip title="发送">
                     <IconButton 
                       color="success" 
                       onClick={handleSendMessage}
-                      disabled={inputValue.trim() === '' || isTyping}
+                      disabled={(inputValue.trim() === '' && !selectedFile) || isTyping}
                       size="small"
                     >
                       <SendIcon fontSize="small" />
@@ -475,6 +545,15 @@ export default function EnterpriseAI() {
                 </Box>
               </Box>
             </Box>
+            
+            {/* 隐藏的文件输入 */}
+            <input
+              type="file"
+              ref={fileInputRef}
+              style={{ display: 'none' }}
+              onChange={handleFileSelect}
+              accept="image/*,.txt,.doc,.docx"
+            />
           </Paper>
         </Box>
       </Box>
