@@ -4,6 +4,7 @@ import { Box, Container, Grid, Card, CardContent, Typography, Button } from '@mu
 import BusinessIcon from '@mui/icons-material/Business';
 import WorkIcon from '@mui/icons-material/Work';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
+import PeopleIcon from '@mui/icons-material/People';
 import Navbar from '@/components/Navbar';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -63,6 +64,17 @@ export default function Home() {
                   企业服务
                 </Button>
                 <Button
+                  variant="contained"
+                  color="info"
+                  size="large"
+                  component={Link}
+                  href="/alumni-network"
+                  startIcon={<PeopleIcon />}
+                  sx={{ mr: 2, mb: { xs: 2, sm: 2 } }}
+                >
+                  校友圈
+                </Button>
+                <Button
                   variant="outlined"
                   color="inherit"
                   size="large"
@@ -71,7 +83,7 @@ export default function Home() {
                   startIcon={<WorkIcon />}
                   sx={{ mr: 2, mb: { xs: 2, sm: 2 } }}
                 >
-                  就业支持
+                  企业招聘直通车
                 </Button>
                 <Button
                   variant="contained"

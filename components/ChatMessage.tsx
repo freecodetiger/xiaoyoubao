@@ -1,10 +1,13 @@
 'use client';
 
-import React from 'react';
-import { Box, Typography, Avatar, Paper, useTheme, Tooltip } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Avatar, Paper, useTheme, Tooltip, IconButton } from '@mui/material';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { ModelType } from '@/utils/ChatService';
+import ImageIcon from '@mui/icons-material/Image';
+import DescriptionIcon from '@mui/icons-material/Description';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 export interface Message {
   id: string;
@@ -12,6 +15,7 @@ export interface Message {
   sender: 'user' | 'ai';
   timestamp: Date;
   modelType?: ModelType;
+  file?: File;
 }
 
 interface ChatMessageProps {
@@ -21,6 +25,33 @@ interface ChatMessageProps {
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const theme = useTheme();
   const isUser = message.sender === 'user';
+  const [filePreview, setFilePreview] = useState<string | null>(null);
+  const [fileType, setFileType] = useState<string>('');
+  
+  // 处理文件预览
+  useEffect(() => {
+    if (message.file) {
+      setFileType(message.file.type);
+      
+      if (message.file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target && e.target.result) {
+            setFilePreview(e.target.result.toString());
+          }
+        };
+        reader.readAsDataURL(message.file);
+      } else if (message.file.type === 'text/plain' || message.file.name.endsWith('.txt')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          if (e.target && e.target.result) {
+            setFilePreview(e.target.result.toString());
+          }
+        };
+        reader.readAsText(message.file);
+      }
+    }
+  }, [message.file]);
   
   // 根据模型类型设置不同的头像和颜色
   const getAvatarContent = () => {
@@ -36,6 +67,69 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const getAvatarTooltip = () => {
     if (isUser) return '您';
     return message.modelType === ModelType.KIMI ? 'Kimi' : '文心一言';
+  };
+  
+  // 渲染文件预览
+  const renderFilePreview = () => {
+    if (!message.file || !filePreview) return null;
+    
+    if (fileType.startsWith('image/')) {
+      return (
+        <Box sx={{ mt: 2, maxWidth: '100%', maxHeight: 300, overflow: 'hidden', borderRadius: 1 }}>
+          <img 
+            src={filePreview} 
+            alt="上传的图片" 
+            style={{ 
+              maxWidth: '100%', 
+              maxHeight: 300, 
+              objectFit: 'contain',
+              borderRadius: '4px'
+            }} 
+          />
+        </Box>
+      );
+    } else if (fileType === 'text/plain' || message.file.name.endsWith('.txt')) {
+      return (
+        <Box 
+          sx={{ 
+            mt: 2, 
+            p: 1.5, 
+            bgcolor: 'background.paper', 
+            borderRadius: 1,
+            border: '1px solid',
+            borderColor: 'divider',
+            maxHeight: 200,
+            overflow: 'auto',
+            fontSize: '0.875rem',
+            fontFamily: 'monospace'
+          }}
+        >
+          <pre style={{ margin: 0, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+            {filePreview}
+          </pre>
+        </Box>
+      );
+    } else {
+      return (
+        <Box 
+          sx={{ 
+            mt: 2, 
+            p: 1.5, 
+            bgcolor: 'background.paper', 
+            borderRadius: 1,
+            border: '1px solid',
+            borderColor: 'divider',
+            display: 'flex',
+            alignItems: 'center'
+          }}
+        >
+          <DescriptionIcon sx={{ mr: 1 }} />
+          <Typography variant="body2" sx={{ flexGrow: 1 }}>
+            {message.file.name}
+          </Typography>
+        </Box>
+      );
+    }
   };
   
   return (
@@ -86,6 +180,8 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
           <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
             {message.content}
           </Typography>
+          
+          {renderFilePreview()}
         </Paper>
         
         <Typography 
