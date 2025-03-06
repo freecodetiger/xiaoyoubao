@@ -5,6 +5,8 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { getTheme } from '@/theme';
 import { useThemeMode } from '@/hooks/useThemeMode';
+<<<<<<< HEAD
+=======
 import { createContext, useContext, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -113,6 +115,7 @@ export function useAuth() {
   }
   return context;
 }
+>>>>>>> upstream
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   const { mode } = useThemeMode();
@@ -122,9 +125,13 @@ export default function Providers({ children }: { children: React.ReactNode }) {
     <AppRouterCacheProvider options={{ enableCssLayer: true }}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
+<<<<<<< HEAD
+        {children}
+=======
         <AuthProvider>
           {children}
         </AuthProvider>
+>>>>>>> upstream
       </ThemeProvider>
     </AppRouterCacheProvider>
   );
